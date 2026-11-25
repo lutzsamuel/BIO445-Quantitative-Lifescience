@@ -1,0 +1,33 @@
+---
+title: "Master document"
+output: html_document
+date: "2026-11-25"
+---
+
+
+## motivation
+
+This document will be a node, where all information and projects will come together. Each relevant script will receive a describtion of what it does. It also denotes, whether or not a script was received from the course or made by the author. 
+
+
+# general points
+
+**no data will be uploaded** -> make a .gitignore file
+
+
+
+## Scripts
+
+all scrippts will follow the following naming
+Date_Author_function. For the received scribts, the date of acquiring will be used. 
+
+
+# received
+
+
+
+
+
+# made
+
+
