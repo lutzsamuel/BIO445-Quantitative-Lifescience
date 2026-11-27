@@ -1,0 +1,37 @@
+---
+title: "Master document"
+output: html_document
+date: "2026-11-25"
+---
+
+
+## motivation
+
+This document will be a node, where all information and projects will come together. Each relevant script will receive a describtion of what it does. It also denotes, whether or not a script was received from the course or made by the author. 
+
+
+# general points
+
+**no data will be uploaded** -> make a .gitignore file
+
+
+
+## Scripts
+
+all scripts will follow the following naming
+Date_Author_function. For the received scribts, the date of acquiring will be used. 
+
+
+
+
+
+## Day 1 
+
+[Day_one](Day_one.html) covered a brief introduction into the course followed by a beginner introduction into R studio. Important concepts include the modelling of population dynamics in R via two models and their significant bifurcation model
+
+
+
+
+
+
+

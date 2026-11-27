@@ -1,0 +1,565 @@
+---
+title: "Day_1"
+output: html_document
+date: "2026-11-26"
+---
+
+```{r}
+library(tidyverse)
+```
+
+## content
+
+#received content
+zip file with
+- CHSI-Data_Sources_Definition
+- Exercises_Intro_to_R.pdf
+
+
+
+
+
+
+
+
+
+# Exercises Intro to R
+
+*Task 1: * Using c(), create a vector "v3" containing the numbers 1 to 5 and verify that the comand 1:5 does the
+same.
+
+```{r}
+v3 <- c(1:5)
+v3
+
+```
+
+*Task2* Create a matrix ma2 whose first column are the numbers 1 to 5 and whose second column are the
+numbers 4 to 8.
+
+```{r}
+
+ma2 <- cbind(1:5, 4:8)
+ma2
+```
+
+*Task3* Select the first and the third element of v2.
+
+```{r}
+v2 <- c(3,1,2)
+
+v2[c(1,3)]
+```
+
+*task4* Select from ma1 the sub-matrix corresponding to the first two rows and the first two columns.
+
+```{r}
+ma1 <- rbind(v2, 1:3, 2:4, 3:5)
+ma1[c(1,2), c(1,2)]
+```
+
+
+
+*task5* 
+```{r}
+#preparation
+# Assign names to ma1
+rownames(ma1)<-c("patient1","patient2","patient3","patient4")
+colnames(ma1) <- c("variable1","variable2","variable3")
+ # Create subset containing only patients 1 and 3
+ ma3 <- ma1[c("patient1","patient3"),]
+ # Create subset containing only variables 1 and 2
+ ma4 <- ma1[,c("variable1","variable2")]
+
+
+ #select patient 1, 2 and variable 1, 3
+ ma1[c("patient1", "patient2"), c("variable1", "variable2")]
+
+```
+
+
+*task6* set in v5 all elements taht are not 2 to 1
+
+```{r}
+v5 <- c(-1,2,3,4,-2)
+v5[v5 != 2] <- 1
+v5
+```
+
+*task7*
+select from ma1 only rows with first value in column is larger than 1
+
+```{r}
+ma1[,ma1[1,] > 1]
+```
+
+
+*task8* select all participants with age under 25 similar to above but using "$" and "%>%" or "|>" to extract
+the column with age. Hint: To subset rows with condition using dplyr, use the function filter instead of select.
+
+```{r}
+#prep
+age <- c(20, 25, 27, 18, 45)
+initials <- c("D.T", "H.C", "B.S", "C.B", "M.P")
+
+participants <- data.frame(initials, age)
+
+
+#select and filter
+participants |> dplyr::filter(age < 25)
+```
+
+
+
+*task9* Import the esophCourse file
+```{r}
+#prep
+
+chsi <- read_csv("Content_per_day/Day_one_content/data/chsiCourse.csv")
+
+
+
+esophCourse <- read_csv("Content_per_day/Day_one_content/data/esophCourse.csv")
+
+
+```
+
+
+*task10* are the files read in as dataframes?
+```{r}
+is.data.frame(chsi)
+is.data.frame(esophCourse)
+```
+
+*task11* Discuss the content of the chsi and esphCOurse dataframe
+
+chsi lists different incidences of causes of deaths and how many occur in a given US state with additional info on socipeconomic states of the populatipn (poverty, obesity, smokers, Few_Fruit_Veg (population with very low fruit intake))
+
+esophCourse gives the incidences of esophagial cancer in a french population.
+
+*task12* generate a subset of chsiCalifornia including only counties from claifornia
+
+```{r}
+chsiCalifornia <- chsi |> filter(CHSI_State_Name.x == "California")
+
+```
+
+
+
+*taks13* discuss what each graph means
+```{r}
+hist(chsi$Lung_Cancer)
+```
+
+shows distribution of the number of incidences of lung cancers. It shows that there are a lot of counties with incidences around 50 with some more and some less
+
+```{r}
+boxplot(chsi$Lung_Cancer, chsi$Col_Cancer, chsi$Brst_Cancer)
+```
+This plot shows the variance of 3 observations in comparison. I.e. the incidences of lung cancer is most likely significantly higher than the cases of other cancers
+
+```{r}
+table(chsi$CHSI_State_Name.x)
+```
+
+This gives a table that lists the total deaths in each state
+
+
+```{r}
+summary(chsi)
+```
+This shows the statistical measurements of interest of all variables
+
+
+```{r}
+plot(chsi$Smoker,chsi$Lung_Cancer)
+```
+This shows the relation between the number of smokers in a state and the lung cancer incidents
+
+```{r}
+table(esophCourse$esophBn,esophCourse$tobgp)
+```
+
+This shows the number of eso. cancer depending on the variables in both control and experimental group
+
+```{r}
+gmodels::CrossTable(esophCourse$esophBn, esophCourse$tobgp)
+```
+
+
+gives frequencies
+
+```{r}
+ta <- table(esophCourse$esophBn,esophCourse$tobgp)
+  mosaicplot(t(ta),col=TRUE)
+```
+gives a mosaic plot
+
+*task14* make the plots more beatuifull
+```{r}
+
+```
+
+
+
+*task15* 
+```{r}
+#prep
+# Step 1: Visualise the relationship between smoking and lung cancer
+plot(Lung_Cancer ~ Smoker, data = chsi)
+# Step 2: Fit a simple linear regression model
+mo <- lm(Lung_Cancer ~ Smoker, data = chsi)
+# Step 3: Examine the results of the fitted model
+summary(mo)
+# Step 4: Add the fitted regression line to the scatter plot
+abline(mo, col = "blue")
+
+```
+
+
+*taks15a* Describe the relationship between smoking and lung cancer
+
+lungcancer is positively correlated with smoking(m = 1.5, p = 0, r2 = 0.35)
+
+*task15b* Identify the estimated intercept and slope
+
+intercept = 24
+slope = 1.5
+
+*task15c* is there a statistically significant association between smoking a.nd lung cancer?
+
+yes -> p-value < 0.05
+
+*task15d* repeat analysis using esophageal cancer as dependent variable
+
+```{r}
+
+mo2 <- lm(esophBn ~ tobgp, data = esophCourse)
+summary(mo2)
+```
+There is a positive relationship between amount of tobaco consumption and cancer. Most significant is this relationship in patients with 30+ consumption
+
+
+*task16*
+
+*task16a* use multiply() to calculate the product of 5 and 8
+```{r}
+#prep
+multiply <- function(x,y){
+  product <- x*y
+  return(product)
+}
+
+multiply(5,8)
+```
+
+*task16b* define a function called circleSurface that takes r of a circle and returns its surface
+
+```{r}
+circleSurface <- function(radius){
+  s <- (radius**2) * pi
+  return(s)
+}
+
+circleSurface(pi)
+```
+
+*task17* est several alternative combinations of intercept and slope using the getSSQ() 
+
+```{r}
+#prep
+
+# Step 1: Store the model summary in an object called modSum
+modSum <- summary(mo)
+ # Step 2: Explore the structure of the model summary
+ # The summary is stored as a list - check what we have in modSum
+ names(modSum)
+ # Step 3: Extract the element "coefficients" which has p-values
+ modSum$coefficients
+ # Step 4: Extract the p-values from the coefficient table
+ modSum$coefficients[, "Pr(>|t|)"]
+ # Step 5: Extract the p-value for smoking only
+ # Remove the first row, which corresponds to the intercept
+ modSum$coefficients[-1, "Pr(>|t|)"]
+ # Note that a negative index excludes the corresponding element/row/column:
+ # e.g. v[-1] returns the vector v without the first element;
+ # ma[-1,] returns the matrix ma without the first row, etc
+
+ # Step 6: Extract the R-squared value
+ modSum$r.squared
+
+ 
+ # For the p values
+getPvalues <- function(mo){
+  modSum <- summary(mo)
+  # Extract the p values
+  pvalues <- modSum$coefficients[-1,"Pr(>|t|)"]
+  # return the p values as output
+  return(pvalues)
+}
+
+ # for the r squared
+getR2 <- function(mo){
+  # Store the model summary
+  modSum <- summary(mo)
+  # Extract the R-squared
+  r2 <- modSum$r.squared
+  # Return the R-squared
+  return(r2)
+  }
+
+
+getPvalues(mo)
+getR2(mo)
+
+
+
+
+getSSQ <- function(parm){
+  
+intercept <- parm[1]
+slope <- parm[2]
+yPredicted <- intercept + slope * chsi$Smoker
+squaredDifference <- (yPredicted - chsi$Lung_Cancer)^2
+ssq <- sum(squaredDifference, na.rm=T)
+return(ssq)
+}
+
+
+summary(mo)$coefficients[,"Estimate"]
+getSSQ(summary(mo)$coefficients[,"Estimate"])
+
+getSSQ(c(23, 1.5))
+
+ 
+```
+
+
+
+*task18*
+```{r}
+#prep
+# Plot the observed data again
+plot(Lung_Cancer ~ Smoker, data = chsi)
+optimalSSQ <- optim(par = c(1000, 1000), fn = getSSQ)
+ optimalSSQ$par
+ optimalSSQ$value
+ 
+ 
+```
+*task18a* compare the estimates with optimal
+
+the intercept is by 0.01 smaller than the optimal while the slope is 0.0006 larger
+
+
+*task18b* repeat with different initial values
+the initial values can change the optimal outcome but only if they are very large f.e. 1000
+
+*task18c* Modify the getSSQ() function to fit a quadratic curve instead of a straight line.
+
+```{r}
+getSSQ_2 <- function(parm){
+  
+intercept <- parm[1]
+slope <- parm[2]
+yPredicted <- intercept + slope * chsi$Smoker
+squaredDifference <- (yPredicted - chsi$Lung_Cancer)^2
+ssq <- sum(squaredDifference, na.rm=T)
+return(ssq)
+}
+
+```
+
+
+
+
+*task19* Rewrite the previous for-loop using logical indexing instead of a for-loop and an if-else statement. Verify
+that both approaches produce the same results.
+
+```{r}
+ v6 <- c(-1,2,-2,4,5,6,-4)
+v6positive <- c(); v6negative <- c()
+for(k in v6){
+  if(k >= 0) {
+  v6positive <- c(v6positive,k)
+} 
+  else{
+    v6negative <- c(v6negative,k)
+  }}
+
+
+v6negative_log <- v6[v6 < 0]
+v6positive_log <- v6[v6 > 0]
+```
+
+
+*task20* 
+Modify the previous nested for-loops to construct a matrix containing the p-values for the associations between
+each health-related outcome and potential exposure. Visualise the resulting matrix using a heatmap. Hint:
+Consider transforming the p-values using − log10(p) to make differences between small -values more visible.
+
+```{r}
+#prep
+R2matrix <- matrix(NA, nrow = 5, ncol = 4)
+rownames(R2matrix)<-colnames(chsi)[1:5]
+colnames(R2matrix)<-colnames(chsi)[6:9]
+for(k in 1:5){
+  for(j in 6:9){
+    mo <- lm(paste((colnames(chsi)[k]),"~",(colnames(chsi)[j])), data=chsi)
+    R2matrix[k,j-5] <- getR2(mo)
+}
+  }
+
+heatmap(R2matrix, col = gray.colors(start=0.9, end=0.2,256), scale = "none", Rowv =NA, Colv=NA)
+
+
+
+#modified loop
+R2matrix2 <- matrix(NA, nrow = 5, ncol = 4)
+rownames(R2matrix2)<-colnames(chsi)[1:5]
+colnames(R2matrix2)<-colnames(chsi)[6:9]
+for(k in 1:5){
+  for(j in 6:9){
+    mo <- lm(paste((colnames(chsi)[k]),"~",(colnames(chsi)[j])), data=chsi)
+    R2matrix2[k,j-5] <- getPvalues(mo)
+}
+  }
+
+heatmap(R2matrix2, col = gray.colors(start=0.9, end=0.2,256), scale = "none", Rowv =NA, Colv=NA)
+```
+*task21*  compare the two heatmaps
+
+The highest R2 values are smoker-lung_cancer, obesity, poverty -lungcancer and obesity, smoker, poverty - CHD
+
+stat. significant are associations of BRC with smoking and suicide with obesity
+
+small p values do not correspond to high R2 values
+
+when multiple testing occurs, it is important to look at the adjusted R2 due to repeated testing errors
+
+
+*task22*
+Discuss:
+
+*task22a* to what extent do the observed statsitical associations provide evidence of causality
+
+non at all. Causality can only be implied to be very likely if both correlate but to actually show causality a different study system has to be used. 
+
+*task22b* what factors could influence or distort the observed associations?
+
+The selection of individuals. These are only dead individuals, meaning the actual proportions to living individuals might be different. 
+
+*task22c* what additional data, study designs or statistical methods could strenghten the evidence for causality?
+
+Data from twins, where one smokes and the other doesnt could help. Other study designs could include animal tests.
+
+*task23* analyze the esophagial dataset
+
+*task23a* What are the hypothesises?
+
+H0 cancer vs control is independent of the variables age, tabaco consumption and alcohol consumption
+
+H1 cancer vs control is not independent of the variables
+
+*task23b* what are the outcome and exposure variables
+
+outcome -> control vs cancer
+exposure -> alcohol consumption, tobaco and age
+
+*task 23c* which statistical model would be most approprate for this analysis?
+
+a poisson/binomial model with variables agegp, alcgp, tobgp
+
+*task23d* how should the results be interpreted
+
+pvalues for the variables lower than 0.05 mean that these variables have an influence on the outcome
+
+```{r}
+mo_eso <- glm(formula = esophBn ~ agegp + alcgp + tobgp, data = esophCourse, family = "binomial")
+
+summary(mo_eso)
+```
+
+
+
+*task24*
+```{r}
+#prep
+logisticMapDynamics <- function(xInitial, growthRate, nGenerations, nBurnIn){
+ dynamics <- rep(NA,nGenerations)
+ dynamics[1] <- xInitial
+for(k in 1:(nGenerations - 1)){
+  dynamics[k+1] <- growthRate * dynamics[k] * (1 - dynamics[k])
+}
+return(dynamics[nBurnIn:nGenerations])
+ }
+plot(logisticMapDynamics(0.01, 1.5, 100, 10), type="l", ylim=c(0,1))
+lines(logisticMapDynamics(0.01, 2.5, 100, 10), col=3)
+lines(logisticMapDynamics(0.01, 3, 100, 10), col = 4)
+lines(logisticMapDynamics(0.01, 3.5, 100, 10), col = 5)
+lines(logisticMapDynamics(0.01, 4, 100, 10), col = 6)
+```
+
+*task24a* why initialise a vector before the for loop
+
+to have a storage unit for each iteration, so that the next iteration can access the previous state
+
+*task24b* why does each iteration depend on the pip density from the previous it.?
+
+because the iterations are delayed by 1
+
+*task24c*
+what is the puprose of the burn in period?
+
+to ignore more trensiant behaviour of the pop
+
+*task25* vary the growth parameter between 1 and 4, compare
+
+
+
+*task26* 
+
+```{r}
+res <- c()
+for(r in seq(1.3, 3.9, by=0.005)){
+dynamics <- logisticMapDynamics(0.01, r, 500, 100)
+ simulation <- rbind(r, dynamics)
+ res <- cbind(res, simulation)
+}
+plot(res[1,],res[2,], pch=".",
+main = "Bifurication digram", xlab = "Growth parameter (r)", ylab = "Population density")
+```
+
+
+*task27*
+
+*task27a* modify the logisticMapDynamics() function to simulate pop according to the alternative
+
+```{r}
+logisticMapDynamics_mod <- function(xInitial, growthRate, nGenerations, nBurnIn){
+ dynamics <- rep(NA,nGenerations)
+ dynamics[1] <- xInitial
+for(j in 1:(nGenerations - 1)){
+  dynamics[j+1] <- dynamics[j] * exp(growthRate * (1 - dynamics[j]))
+}
+return(dynamics[nBurnIn:nGenerations])
+}
+
+plot(logisticMapDynamics_mod(0.01, 1.5, 100, 10), type="l", ylim=c(0,1))
+lines(logisticMapDynamics_mod(0.01, 2.5, 100, 10), col=3)
+lines(logisticMapDynamics_mod(0.01, 3, 100, 10), col = 4)
+lines(logisticMapDynamics_mod(0.01, 3.5, 100, 10), col = 5)
+lines(logisticMapDynamics_mod(0.01, 4, 100, 10), col = 6)
+```
+
+```{r}
+res <- c()
+for(r in seq(1.3, 3.9, by=0.005)){
+dynamics <- logisticMapDynamics_mod(0.01, r, 500, 100)
+ simulation <- rbind(r, dynamics)
+ res <- cbind(res, simulation)
+}
+plot(res[1,],res[2,], pch=".",
+main = "Bifurication digram", xlab = "Growth parameter (r)", ylab = "Population density")
+```
+
