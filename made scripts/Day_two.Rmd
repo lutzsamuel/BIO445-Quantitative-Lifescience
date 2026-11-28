@@ -2,12 +2,14 @@
 title: "Day_two"
 output: html_document
 date: "2026-11-27"
+runtime: shiny
 ---
 
 ## Virus Dynamics
 
 ```{r}
 library(tidyverse)
+library(shiny)
 ```
 
 
@@ -18,10 +20,12 @@ b. From Problem1_2_start.R:
 Annotation to the code was improved and adjusted
 
 ```{r}
+#Import packages
 library(deSolve)
 library(ggplot2)
 
 
+#define a function that replicates the mathematical equations
 TI.model <- function(t, x, parms) {
   Ta <- x[1] # pop 1
   I  <- x[2] # pop 2
@@ -33,14 +37,18 @@ TI.model <- function(t, x, parms) {
   })
 }
 
-### by varying beta 
+# define the parameters of for the function
 parmsTI  <- c(lambda = 1000, 
                deltaT = 0.05,
                deltaI = log(2)/1.39,
                beta = NA)
-parmsTI["beta"] <- 5/(parmsTI["lambda"]/parmsTI["deltaT"]/parmsTI["deltaI"]) #why 5 / rest?
+
+parmsTI["beta"] <- 5/(parmsTI["lambda"]/parmsTI["deltaT"]/parmsTI["deltaI"]) #write beta as a function of R0 and the other parameters
+
+#define the starting T population. 
 xstartTI <- c(Ta = as.numeric(parmsTI["lambda"]/parmsTI["deltaT"]), 
-               I = 1) #why divide by death percent??
+               I = 1) 
+#define a time vector
 times  <- seq(0, 100, length=500)
 
 #here rk4 is a function provided by R to solve differential equations which you do not have to understand in further detail
@@ -55,12 +63,73 @@ ggplot(data =  out.TI_long, mapping= aes(x = time, y = value, color = name)) +
   geom_line(lwd = 1) +
   theme_classic() 
 
+
+
 ```
 
 
 
+b 2) requiure to change the parameters to see, what happens.
+
+parameters to influence:
+
+lambda -> production of T cells. Can go from 0 to infinity. On average a human has [500-1500](https://www.healthline.com/health/t-cell-count) Tcells per mm3 of blood. An average adult has about [5](https://en.wikipedia.org/wiki/Blood_volume) liters of blood -> highest estimate for susceptible Tcells: 1500 T/mm3 * 5 * 10ˆ6 mm3 = 7.5e+09 T cells
 
 
+
+
+deltaT
+deltaI
+Beta
+
+```{r}
+
+
+ui <- fluidPage(
+  
+  titlePanel("Varying lambda in the TI model"),
+  sidebarLayout(
+  sidebarPanel(
+    sliderInput("lambda", "value of lambda", min = 0, max = 2000, value = 1000),
+    sliderInput("deltaT", "value deltaT", min = 0, max = 1, value = 0.05, step = 0.01),
+    sliderInput("deltaI", "value deltaI", min = 0, max = 1, value = 0.5, step = 0.01),
+    sliderInput("beta", "value beta", min = 0, max = 0.01, value = 0.001, step = 0.0001)
+  ),
+  mainPanel(
+    plotOutput("plot")
+  )))
+  
+
+
+server <- function(input, output){
+  output$plot <- renderPlot({
+    
+    parmsTI2  <- c(lambda = input$lambda, 
+               deltaT = input$deltaT,
+               deltaI = input$deltaI,
+               beta = input$beta)
+    
+    xstartTI2 <- c(Ta = as.numeric(2000), I = 1)
+    
+    times2  <- seq(0, 100, length = 500)
+    
+
+    #perform calculation
+    out.TI2 <- as.data.frame(rk4(xstartTI2, times2, TI.model, parmsTI2))
+    
+    out.TI_long2 = out.TI2 |>
+  tidyr::pivot_longer(cols= -time)
+    
+#plot the result
+    ggplot(data =  out.TI_long2, mapping= aes(x = time, y = value, color = name)) +
+  geom_line(lwd = 1) +
+  theme_classic() 
+
+  })
+}
+
+shinyApp(ui = ui, server = server)
+```
 
 
 
@@ -117,31 +186,66 @@ t1_2 <- log(1/2)/(deltaI_fit)
 
 
 ## problem 3
-
+120
+ 
+121
+ 
 ```{r}
-
+122
+ 
+123
+ 
 data3 <- read_csv("Content_per_day/Day_two_content/Exercises Olat Upload/data/dataset_problem3.csv")
-
+124
+ 
+125
+ 
 getSSG3 <- function(parm){
+126
+ 
   Io_fi_H <- parm[1]
+127
+ 
   deltaI_H <- parm[2]
+128
+ 
   c1 <- parm[3]
+129
+ 
   c2 <- 1-c1
+130
+ 
   
+131
+ 
   
+132
+ 
   I_fit_H <- Io_fi_H * exp((-deltaI_H) * data3$time)
+133
+ 
   SSQ <- (log(I_fit) - log(data3$V))**2
+134
+ 
   
+135
+ 
   return(sum(SSQ))
-
-}
-
+136
+ 
+137
+ 
+} 
+Stage line	
+  
+Discard line	
+ 
+138
+ 
+139
+ 
 I0_fit <- optim(par = c(1, 1, 0.5), fn = getSSG3)$par[1]
-deltaI_fit <- optim(par = c(1,1, 0.5), fn = getSSG3)$par[2]
-
-
-
-
-```
-
+140
+ 
+deltaI_fit <- optim(par = c(1,1, 0.5), fn = getSSG3)$par[2
 
