@@ -1,0 +1,147 @@
+---
+title: "Day_two"
+output: html_document
+date: "2026-11-27"
+---
+
+## Virus Dynamics
+
+```{r}
+library(tidyverse)
+```
+
+
+## Problem 1
+
+b. From Problem1_2_start.R:
+
+Annotation to the code was improved and adjusted
+
+```{r}
+library(deSolve)
+library(ggplot2)
+
+
+TI.model <- function(t, x, parms) {
+  Ta <- x[1] # pop 1
+  I  <- x[2] # pop 2
+  with(as.list(parms),{
+    dT <- lambda- deltaT * Ta - beta * Ta * I #changes in pops
+    dI <- beta * Ta * I - deltaI * I #changes in pop
+    res <- c(dT, dI)
+    list(res)
+  })
+}
+
+### by varying beta 
+parmsTI  <- c(lambda = 1000, 
+               deltaT = 0.05,
+               deltaI = log(2)/1.39,
+               beta = NA)
+parmsTI["beta"] <- 5/(parmsTI["lambda"]/parmsTI["deltaT"]/parmsTI["deltaI"]) #why 5 / rest?
+xstartTI <- c(Ta = as.numeric(parmsTI["lambda"]/parmsTI["deltaT"]), 
+               I = 1) #why divide by death percent??
+times  <- seq(0, 100, length=500)
+
+#here rk4 is a function provided by R to solve differential equations which you do not have to understand in further detail
+out.TI <- as.data.frame(rk4(xstartTI, times, TI.model, parmsTI))
+
+out.TI_long = out.TI |>
+  tidyr::pivot_longer(cols= -time) 
+
+#plotting of the numerically solved quantities
+#fill in the gaps by yourself
+ggplot(data =  out.TI_long, mapping= aes(x = time, y = value, color = name)) +
+  geom_line(lwd = 1) +
+  theme_classic() 
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Problem 2 - Exercise c 
+
+Calculate the parameters for rate I
+
+```{r}
+#import data
+virusLoad <- read_csv("Content_per_day/Day_two_content/Exercises Olat Upload/data/virusLoadOnTreatment.csv")
+
+ggplot(virusLoad, aes(x = time, y = V)) +
+  geom_point()
+
+
+
+getSSG <- function(parm){
+  Io_fi <- parm[1]
+  deltaI <- parm[2]
+  
+  I_fit <- Io_fi * exp((-deltaI) * virusLoad$time)
+  SSQ <- (log(I_fit) - log(virusLoad$V))**2
+  
+  return(sum(SSQ))
+
+}
+
+I0_fit <- optim(par = c(1, 1), fn = getSSG)$par[1]
+deltaI_fit <- optim(par = c(1,1), fn = getSSG)$par[2]
+
+
+
+ggplot(virusLoad, aes(x = time, y = log(V))) +
+  geom_point()
+
+model <- lm(log(V) ~ time, virusLoad)
+deltaI_est <- summary(model)["coefficients"][[1]][1]
+
+
+#calculate t1/2
+
+
+
+#t1/2 
+t1_2 <- log(1/2)/(deltaI_fit)
+
+```
+
+
+## problem 3
+
+```{r}
+
+data3 <- read_csv("Content_per_day/Day_two_content/Exercises Olat Upload/data/dataset_problem3.csv")
+
+getSSG3 <- function(parm){
+  Io_fi_H <- parm[1]
+  deltaI_H <- parm[2]
+  c1 <- parm[3]
+  c2 <- 1-c1
+  
+  
+  I_fit_H <- Io_fi_H * exp((-deltaI_H) * data3$time)
+  SSQ <- (log(I_fit) - log(data3$V))**2
+  
+  return(sum(SSQ))
+
+}
+
+I0_fit <- optim(par = c(1, 1, 0.5), fn = getSSG3)$par[1]
+deltaI_fit <- optim(par = c(1,1, 0.5), fn = getSSG3)$par[2]
+
+
+
+
+```
+
+
